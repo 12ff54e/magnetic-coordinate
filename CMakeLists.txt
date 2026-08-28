@@ -27,6 +27,7 @@ option(MAGNETIC_COORDINATE_BUILD_TESTING "Build magnetic-coordinate tests" ON)
 add_library(magnetic_coordinate STATIC
   src/boozer_fft.cu
   src/cumes_binary.cpp
+  src/mixed_grid.cpp
   src/pest.cpp
   src/radial.cpp
   src/spectral.cpp)
@@ -53,6 +54,13 @@ else()
   target_compile_options(magnetic_coordinate PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wpedantic -Wconversion -Werror>
     $<$<COMPILE_LANGUAGE:CUDA>:--Werror cross-execution-space-call>)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # GCC 12 reports a false maybe-uninitialized warning while destroying the
+    # third-party B-spline library's std::variant-based periodic band matrix.
+    # Keep every other project and dependency warning under -Werror.
+    set_source_files_properties(src/mixed_grid.cpp src/pest.cpp PROPERTIES
+      COMPILE_OPTIONS "-Wno-error=maybe-uninitialized")
+  endif()
 endif()
 
 if(BUILD_TESTING AND MAGNETIC_COORDINATE_BUILD_TESTING)
@@ -105,6 +113,19 @@ if(BUILD_TESTING AND MAGNETIC_COORDINATE_BUILD_TESTING)
   endif()
   add_test(NAME magnetic-coordinate.pest
            COMMAND magnetic_coordinate_pest_test)
+
+  add_executable(magnetic_coordinate_mixed_grid_test
+    tests/mixed_grid_test.cpp)
+  target_link_libraries(magnetic_coordinate_mixed_grid_test
+    PRIVATE magnetic-coordinate::magnetic-coordinate)
+  if(MSVC)
+    target_compile_options(magnetic_coordinate_mixed_grid_test PRIVATE /W4 /WX)
+  else()
+    target_compile_options(magnetic_coordinate_mixed_grid_test PRIVATE
+      -Wall -Wextra -Wpedantic -Wconversion -Werror)
+  endif()
+  add_test(NAME magnetic-coordinate.mixed-grid
+           COMMAND magnetic_coordinate_mixed_grid_test)
 
   add_executable(magnetic_coordinate_boozer_fft_test
     tests/boozer_fft_test.cu)
