@@ -1,14 +1,22 @@
 # magnetic-coordinate
 
-`magnetic-coordinate` converts converged cuMES equilibria into magnetic
-coordinate representations. Its first target is a Boozer representation that
-keeps the source toroidal angle and exports the shift `nu`, allowing consumers
-to construct their own grids uniform in the Boozer toroidal angle.
+`magnetic-coordinate` converts a converged cuMES schema-v8 equilibrium into a
+Boozer representation. It exports geometry on a grid uniform in Boozer
+poloidal angle while deliberately retaining the source toroidal angle:
 
-The implementation is currently being built from the bottom up. The first
-available component validates cuMES scientific fields, computes the invariant
-magnetic-field strength, unstaggers half-grid quantities onto integer radial
-surfaces, and recovers the converged rotational-transform profile.
+```text
+(s, theta_b, zeta),       zeta_b = zeta + nu(theta_b, zeta)
+```
+
+This is a mixed grid, not a grid uniform in both Boozer angles. Spectral `nu`
+is included so consumers can construct whatever uniform `zeta_b` grid they
+need.
+
+The transform validates cuMES scientific fields, computes invariant `B`,
+unstaggers radial fields, recovers converged iota, reconstructs physical PEST
+lambda, performs both monotone angular inversions with periodic cubic
+B-splines, solves the magnetic differential equation with batched CUDA FFTs,
+and analyzes the final mixed-grid `R`, `Z`, and `nu` spectra on the GPU.
 
 ## Build and test
 
@@ -16,7 +24,15 @@ surfaces, and recovers the converged rotational-transform profile.
 cmake -B build
 cmake --build build -j
 ctest --test-dir build --output-on-failure
+
+./build/cumes-boozer cumes-output.bin --output boozer-output.bin
 ```
 
-Angular B-spline remapping and batched CUDA FFT stages will be added on top of
-this host-side preparation layer.
+The default output poloidal resolution and spectral truncation follow the
+source equilibrium. They can be selected independently with `--ntheta`,
+`--mmax`, and `--nmax`. `--radial-order 2|4` controls only half-to-full radial
+interpolation. See [the format contract](docs/boozer-binary-v1.md) for exact
+array ordering and Fourier normalization.
+
+The magnetic axis is intentionally excluded because flux angles are
+degenerate there; the file records `first_surface=1` explicitly.

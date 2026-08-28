@@ -25,13 +25,15 @@ set(CMAKE_CUDA_EXTENSIONS OFF)
 option(MAGNETIC_COORDINATE_BUILD_TESTING "Build magnetic-coordinate tests" ON)
 
 add_library(magnetic_coordinate STATIC
+  src/boozer_binary.cpp
   src/boozer_fft.cu
   src/cumes_binary.cpp
   src/mixed_grid.cpp
   src/mixed_spectrum.cu
   src/pest.cpp
   src/radial.cpp
-  src/spectral.cpp)
+  src/spectral.cpp
+  src/transform.cpp)
 add_library(magnetic-coordinate::magnetic-coordinate ALIAS magnetic_coordinate)
 
 target_include_directories(magnetic_coordinate
@@ -49,12 +51,19 @@ target_link_libraries(magnetic_coordinate PUBLIC CUDA::cudart CUDA::cufft)
 set_target_properties(magnetic_coordinate PROPERTIES
   CUDA_SEPARABLE_COMPILATION ON)
 
+add_executable(cumes-boozer src/main.cpp)
+target_link_libraries(cumes-boozer
+  PRIVATE magnetic-coordinate::magnetic-coordinate)
+
 if(MSVC)
   target_compile_options(magnetic_coordinate PRIVATE /W4 /WX)
+  target_compile_options(cumes-boozer PRIVATE /W4 /WX)
 else()
   target_compile_options(magnetic_coordinate PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wpedantic -Wconversion -Werror>
     $<$<COMPILE_LANGUAGE:CUDA>:--Werror cross-execution-space-call>)
+  target_compile_options(cumes-boozer PRIVATE
+    -Wall -Wextra -Wpedantic -Wconversion -Werror)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # GCC 12 reports a false maybe-uninitialized warning while destroying the
     # third-party B-spline library's std::variant-based periodic band matrix.
@@ -65,6 +74,20 @@ else()
 endif()
 
 if(BUILD_TESTING AND MAGNETIC_COORDINATE_BUILD_TESTING)
+  add_executable(magnetic_coordinate_boozer_binary_test
+    tests/boozer_binary_test.cpp)
+  target_link_libraries(magnetic_coordinate_boozer_binary_test
+    PRIVATE magnetic-coordinate::magnetic-coordinate)
+  if(MSVC)
+    target_compile_options(magnetic_coordinate_boozer_binary_test
+      PRIVATE /W4 /WX)
+  else()
+    target_compile_options(magnetic_coordinate_boozer_binary_test PRIVATE
+      -Wall -Wextra -Wpedantic -Wconversion -Werror)
+  endif()
+  add_test(NAME magnetic-coordinate.boozer-binary
+           COMMAND magnetic_coordinate_boozer_binary_test)
+
   add_executable(magnetic_coordinate_radial_test tests/radial_test.cpp)
   target_link_libraries(magnetic_coordinate_radial_test
     PRIVATE magnetic-coordinate::magnetic-coordinate)
