@@ -12,6 +12,7 @@ option(MAGNETIC_COORDINATE_BUILD_TESTING "Build magnetic-coordinate tests" ON)
 
 add_library(magnetic_coordinate STATIC
   src/cumes_binary.cpp
+  src/pest.cpp
   src/radial.cpp
   src/spectral.cpp)
 add_library(magnetic-coordinate::magnetic-coordinate ALIAS magnetic_coordinate)
@@ -20,6 +21,11 @@ target_include_directories(magnetic_coordinate
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
+target_include_directories(magnetic_coordinate SYSTEM PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/BSplineInterpolation/include)
+target_compile_definitions(magnetic_coordinate PRIVATE
+  INTP_CELL_LAYOUT
+  INTP_PERIODIC_NO_DUMMY_POINT)
 
 target_compile_features(magnetic_coordinate PUBLIC cxx_std_20)
 
@@ -68,4 +74,16 @@ if(BUILD_TESTING AND MAGNETIC_COORDINATE_BUILD_TESTING)
   endif()
   add_test(NAME magnetic-coordinate.spectral
            COMMAND magnetic_coordinate_spectral_test)
+
+  add_executable(magnetic_coordinate_pest_test tests/pest_test.cpp)
+  target_link_libraries(magnetic_coordinate_pest_test
+    PRIVATE magnetic-coordinate::magnetic-coordinate)
+  if(MSVC)
+    target_compile_options(magnetic_coordinate_pest_test PRIVATE /W4 /WX)
+  else()
+    target_compile_options(magnetic_coordinate_pest_test PRIVATE
+      -Wall -Wextra -Wpedantic -Wconversion -Werror)
+  endif()
+  add_test(NAME magnetic-coordinate.pest
+           COMMAND magnetic_coordinate_pest_test)
 endif()
