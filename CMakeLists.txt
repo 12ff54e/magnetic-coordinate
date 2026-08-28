@@ -12,7 +12,8 @@ option(MAGNETIC_COORDINATE_BUILD_TESTING "Build magnetic-coordinate tests" ON)
 
 add_library(magnetic_coordinate STATIC
   src/cumes_binary.cpp
-  src/radial.cpp)
+  src/radial.cpp
+  src/spectral.cpp)
 add_library(magnetic-coordinate::magnetic-coordinate ALIAS magnetic_coordinate)
 
 target_include_directories(magnetic_coordinate
@@ -55,4 +56,16 @@ if(BUILD_TESTING AND MAGNETIC_COORDINATE_BUILD_TESTING)
   endif()
   add_test(NAME magnetic-coordinate.cumes-binary
            COMMAND magnetic_coordinate_cumes_binary_test)
+
+  add_executable(magnetic_coordinate_spectral_test tests/spectral_test.cpp)
+  target_link_libraries(magnetic_coordinate_spectral_test
+    PRIVATE magnetic-coordinate::magnetic-coordinate)
+  if(MSVC)
+    target_compile_options(magnetic_coordinate_spectral_test PRIVATE /W4 /WX)
+  else()
+    target_compile_options(magnetic_coordinate_spectral_test PRIVATE
+      -Wall -Wextra -Wpedantic -Wconversion -Werror)
+  endif()
+  add_test(NAME magnetic-coordinate.spectral
+           COMMAND magnetic_coordinate_spectral_test)
 endif()
