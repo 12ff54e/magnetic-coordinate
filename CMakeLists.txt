@@ -1,16 +1,31 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(magnetic-coordinate VERSION 0.1.0 LANGUAGES CXX)
+if(NOT DEFINED CMAKE_CUDA_HOST_COMPILER AND
+   EXISTS "/usr/bin/g++-12")
+  set(CMAKE_CUDA_HOST_COMPILER "/usr/bin/g++-12" CACHE FILEPATH
+      "CUDA host compiler")
+endif()
+if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+  set(CMAKE_CUDA_ARCHITECTURES 61 CACHE STRING
+      "CUDA architectures for magnetic-coordinate")
+endif()
+
+project(magnetic-coordinate VERSION 0.1.0 LANGUAGES CXX CUDA)
 
 include(CTest)
+find_package(CUDAToolkit REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CUDA_STANDARD 20)
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+set(CMAKE_CUDA_EXTENSIONS OFF)
 
 option(MAGNETIC_COORDINATE_BUILD_TESTING "Build magnetic-coordinate tests" ON)
 
 add_library(magnetic_coordinate STATIC
+  src/boozer_fft.cu
   src/cumes_binary.cpp
   src/pest.cpp
   src/radial.cpp
@@ -28,12 +43,16 @@ target_compile_definitions(magnetic_coordinate PRIVATE
   INTP_PERIODIC_NO_DUMMY_POINT)
 
 target_compile_features(magnetic_coordinate PUBLIC cxx_std_20)
+target_link_libraries(magnetic_coordinate PUBLIC CUDA::cudart CUDA::cufft)
+set_target_properties(magnetic_coordinate PROPERTIES
+  CUDA_SEPARABLE_COMPILATION ON)
 
 if(MSVC)
   target_compile_options(magnetic_coordinate PRIVATE /W4 /WX)
 else()
   target_compile_options(magnetic_coordinate PRIVATE
-    -Wall -Wextra -Wpedantic -Wconversion -Werror)
+    $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wpedantic -Wconversion -Werror>
+    $<$<COMPILE_LANGUAGE:CUDA>:--Werror cross-execution-space-call>)
 endif()
 
 if(BUILD_TESTING AND MAGNETIC_COORDINATE_BUILD_TESTING)
@@ -86,4 +105,15 @@ if(BUILD_TESTING AND MAGNETIC_COORDINATE_BUILD_TESTING)
   endif()
   add_test(NAME magnetic-coordinate.pest
            COMMAND magnetic_coordinate_pest_test)
+
+  add_executable(magnetic_coordinate_boozer_fft_test
+    tests/boozer_fft_test.cu)
+  target_link_libraries(magnetic_coordinate_boozer_fft_test
+    PRIVATE magnetic-coordinate::magnetic-coordinate)
+  set_target_properties(magnetic_coordinate_boozer_fft_test PROPERTIES
+    CUDA_STANDARD 20
+    CUDA_STANDARD_REQUIRED ON
+    CUDA_EXTENSIONS OFF)
+  add_test(NAME magnetic-coordinate.boozer-fft
+           COMMAND magnetic_coordinate_boozer_fft_test)
 endif()
