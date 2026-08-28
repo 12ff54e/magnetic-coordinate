@@ -28,6 +28,7 @@ add_library(magnetic_coordinate STATIC
   src/boozer_fft.cu
   src/cumes_binary.cpp
   src/mixed_grid.cpp
+  src/mixed_spectrum.cu
   src/pest.cpp
   src/radial.cpp
   src/spectral.cpp)
@@ -137,4 +138,15 @@ if(BUILD_TESTING AND MAGNETIC_COORDINATE_BUILD_TESTING)
     CUDA_EXTENSIONS OFF)
   add_test(NAME magnetic-coordinate.boozer-fft
            COMMAND magnetic_coordinate_boozer_fft_test)
+
+  add_executable(magnetic_coordinate_mixed_spectrum_test
+    tests/mixed_spectrum_test.cu)
+  target_link_libraries(magnetic_coordinate_mixed_spectrum_test
+    PRIVATE magnetic-coordinate::magnetic-coordinate)
+  set_target_properties(magnetic_coordinate_mixed_spectrum_test PROPERTIES
+    CUDA_STANDARD 20
+    CUDA_STANDARD_REQUIRED ON
+    CUDA_EXTENSIONS OFF)
+  add_test(NAME magnetic-coordinate.mixed-spectrum
+           COMMAND magnetic_coordinate_mixed_spectrum_test)
 endif()
