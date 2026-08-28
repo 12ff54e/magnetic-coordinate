@@ -37,3 +37,14 @@ exact array ordering and Fourier normalization.
 
 The magnetic axis is intentionally excluded because flux angles are
 degenerate there; the file records `first_surface=1` explicitly.
+
+## Install and consume
+
+```bash
+cmake --install build --prefix /desired/prefix
+```
+
+The install exports `magnetic-coordinate::magnetic_coordinate` and the
+`cumes-boozer` executable. A consuming CMake project can use
+`find_package(magnetic-coordinate CONFIG REQUIRED)` and link the exported
+target.

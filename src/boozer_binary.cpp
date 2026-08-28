@@ -2,6 +2,7 @@
 
 #include <array>
 #include <bit>
+#include <cmath>
 #include <complex>
 #include <cstddef>
 #include <cstdint>
@@ -155,6 +156,44 @@ void validate(const BoozerResult& result) {
         result.spectrum.z.size() != spectral_count ||
         result.spectrum.nu.size() != spectral_count) {
         throw std::invalid_argument("inconsistent Boozer result dimensions");
+    }
+    const auto finite_reals = [](std::span<const double> values) {
+        for (double value : values) {
+            if (!std::isfinite(value)) return false;
+        }
+        return true;
+    };
+    const auto finite_complex =
+        [](std::span<const std::complex<double>> values) {
+            for (const auto value : values) {
+                if (!std::isfinite(value.real()) ||
+                    !std::isfinite(value.imag())) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    if (!finite_reals(result.s) || !finite_reals(result.iota) ||
+        !finite_reals(result.grid.b) ||
+        !finite_reals(result.grid.sqrtg_b) ||
+        !finite_reals(result.grid.b2j00) ||
+        !finite_complex(result.spectrum.r) ||
+        !finite_complex(result.spectrum.z) ||
+        !finite_complex(result.spectrum.nu) ||
+        !(result.resonance_tolerance > 0.0) ||
+        !std::isfinite(result.resonance_tolerance)) {
+        throw std::invalid_argument("Boozer result contains non-finite data");
+    }
+    std::size_t mode = 0;
+    for (int n = -result.spectrum.nmax; n <= result.spectrum.nmax; ++n) {
+        for (int m = -result.spectrum.mmax; m <= result.spectrum.mmax; ++m) {
+            if (result.spectrum.m[mode] != m ||
+                result.spectrum.n[mode] != n) {
+                throw std::invalid_argument(
+                    "Boozer result has noncanonical mode ordering");
+            }
+            ++mode;
+        }
     }
 }
 

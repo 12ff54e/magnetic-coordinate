@@ -13,6 +13,8 @@ endif()
 project(magnetic-coordinate VERSION 0.1.0 LANGUAGES CXX CUDA)
 
 include(CTest)
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
 find_package(CUDAToolkit REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -56,6 +58,32 @@ set_target_properties(magnetic_coordinate PROPERTIES
 add_executable(cumes-boozer src/main.cpp)
 target_link_libraries(cumes-boozer
   PRIVATE magnetic-coordinate::magnetic-coordinate)
+
+configure_package_config_file(
+  cmake/magnetic-coordinate-config.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/magnetic-coordinate-config.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/magnetic-coordinate)
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/magnetic-coordinate-config-version.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion)
+
+install(TARGETS magnetic_coordinate cumes-boozer
+  EXPORT magnetic-coordinate-targets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include/magnetic_coordinate
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(EXPORT magnetic-coordinate-targets
+  FILE magnetic-coordinate-targets.cmake
+  NAMESPACE magnetic-coordinate::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/magnetic-coordinate)
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/magnetic-coordinate-config.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/magnetic-coordinate-config-version.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/magnetic-coordinate)
 
 if(MSVC)
   target_compile_options(magnetic_coordinate PRIVATE /W4 /WX)
