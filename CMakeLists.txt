@@ -39,6 +39,7 @@ add_library(magnetic_coordinate STATIC
   src/spectral_gpu.cu
   src/transform.cpp)
 add_library(magnetic-coordinate::magnetic-coordinate ALIAS magnetic_coordinate)
+add_library(magnetic-coordinate::magnetic_coordinate ALIAS magnetic_coordinate)
 
 target_include_directories(magnetic_coordinate
   PUBLIC
