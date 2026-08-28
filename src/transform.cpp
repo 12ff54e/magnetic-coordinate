@@ -32,7 +32,7 @@ BoozerResult transform_to_boozer(const CumesEquilibrium& equilibrium,
         equilibrium.native_field_view(), settings.radial_order);
     const auto normalization = reconstruct_flux_normalization(equilibrium);
     const auto geometry =
-        synthesize_native_geometry(equilibrium, normalization);
+        synthesize_native_geometry_gpu(equilibrium, normalization);
     const auto pest = remap_to_pest(geometry, integer_fields);
     const auto shift = solve_boozer_shift_gpu(
         pest, integer_fields.iota, equilibrium.nfp,

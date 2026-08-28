@@ -33,6 +33,7 @@ add_library(magnetic_coordinate STATIC
   src/pest.cpp
   src/radial.cpp
   src/spectral.cpp
+  src/spectral_gpu.cu
   src/transform.cpp)
 add_library(magnetic-coordinate::magnetic-coordinate ALIAS magnetic_coordinate)
 
@@ -125,6 +126,17 @@ if(BUILD_TESTING AND MAGNETIC_COORDINATE_BUILD_TESTING)
   endif()
   add_test(NAME magnetic-coordinate.spectral
            COMMAND magnetic_coordinate_spectral_test)
+
+  add_executable(magnetic_coordinate_spectral_gpu_test
+    tests/spectral_gpu_test.cu)
+  target_link_libraries(magnetic_coordinate_spectral_gpu_test
+    PRIVATE magnetic-coordinate::magnetic-coordinate)
+  set_target_properties(magnetic_coordinate_spectral_gpu_test PROPERTIES
+    CUDA_STANDARD 20
+    CUDA_STANDARD_REQUIRED ON
+    CUDA_EXTENSIONS OFF)
+  add_test(NAME magnetic-coordinate.spectral-gpu
+           COMMAND magnetic_coordinate_spectral_gpu_test)
 
   add_executable(magnetic_coordinate_pest_test tests/pest_test.cpp)
   target_link_libraries(magnetic_coordinate_pest_test

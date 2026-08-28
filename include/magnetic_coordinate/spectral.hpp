@@ -40,6 +40,12 @@ NativeAngularGeometry synthesize_native_geometry(
     const CumesEquilibrium& equilibrium,
     const FluxNormalization& normalization);
 
+// Production synthesis across every surface and angular point on the GPU.
+// The CPU implementation above remains the independent reference oracle.
+NativeAngularGeometry synthesize_native_geometry_gpu(
+    const CumesEquilibrium& equilibrium,
+    const FluxNormalization& normalization);
+
 }  // namespace magnetic_coordinate
 
 #endif  // MAGNETIC_COORDINATE_SPECTRAL_HPP_
