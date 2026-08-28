@@ -25,6 +25,7 @@ set(CMAKE_CUDA_EXTENSIONS OFF)
 option(MAGNETIC_COORDINATE_BUILD_TESTING "Build magnetic-coordinate tests" ON)
 
 add_library(magnetic_coordinate STATIC
+  src/angular_resample.cpp
   src/boozer_binary.cpp
   src/boozer_fft.cu
   src/cumes_binary.cpp
@@ -69,12 +70,27 @@ else()
     # GCC 12 reports a false maybe-uninitialized warning while destroying the
     # third-party B-spline library's std::variant-based periodic band matrix.
     # Keep every other project and dependency warning under -Werror.
-    set_source_files_properties(src/mixed_grid.cpp src/pest.cpp PROPERTIES
+    set_source_files_properties(
+      src/angular_resample.cpp src/mixed_grid.cpp src/pest.cpp PROPERTIES
       COMPILE_OPTIONS "-Wno-error=maybe-uninitialized")
   endif()
 endif()
 
 if(BUILD_TESTING AND MAGNETIC_COORDINATE_BUILD_TESTING)
+  add_executable(magnetic_coordinate_angular_resample_test
+    tests/angular_resample_test.cpp)
+  target_link_libraries(magnetic_coordinate_angular_resample_test
+    PRIVATE magnetic-coordinate::magnetic-coordinate)
+  if(MSVC)
+    target_compile_options(magnetic_coordinate_angular_resample_test
+      PRIVATE /W4 /WX)
+  else()
+    target_compile_options(magnetic_coordinate_angular_resample_test PRIVATE
+      -Wall -Wextra -Wpedantic -Wconversion -Werror)
+  endif()
+  add_test(NAME magnetic-coordinate.angular-resample
+           COMMAND magnetic_coordinate_angular_resample_test)
+
   add_executable(magnetic_coordinate_boozer_binary_test
     tests/boozer_binary_test.cpp)
   target_link_libraries(magnetic_coordinate_boozer_binary_test

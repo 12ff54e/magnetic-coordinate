@@ -14,6 +14,7 @@ struct TransformSettings {
     // Zero selects the source angular grid size. Negative truncations select
     // the source truncation, clipped below the output Nyquist modes.
     int output_ntheta = 0;
+    int output_nzeta = 0;
     int mmax = -1;
     int nmax = -1;
     RadialInterpolationOrder radial_order =

@@ -55,6 +55,9 @@ CommandLine parse_command_line(int argc, char** argv) {
         } else if (token == "--ntheta") {
             command.settings.output_ntheta =
                 parse_integer(value_after("--ntheta"), "--ntheta");
+        } else if (token == "--nzeta") {
+            command.settings.output_nzeta =
+                parse_integer(value_after("--nzeta"), "--nzeta");
         } else if (token == "--mmax") {
             command.settings.mmax =
                 parse_integer(value_after("--mmax"), "--mmax");
@@ -80,6 +83,7 @@ CommandLine parse_command_line(int argc, char** argv) {
         } else if (token == "-h" || token == "--help") {
             std::cout
                 << "usage: cumes-boozer INPUT [--output FILE] [--ntheta N] "
+                   "[--nzeta N] "
                    "[--mmax M] [--nmax N] [--radial-order 2|4] "
                    "[--resonance-tolerance X]\n";
             std::exit(0);

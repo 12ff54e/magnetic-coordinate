@@ -30,9 +30,10 @@ ctest --test-dir build --output-on-failure
 
 The default output poloidal resolution and spectral truncation follow the
 source equilibrium. They can be selected independently with `--ntheta`,
-`--mmax`, and `--nmax`. `--radial-order 2|4` controls only half-to-full radial
-interpolation. See [the format contract](docs/boozer-binary-v1.md) for exact
-array ordering and Fourier normalization.
+`--nzeta`, `--mmax`, and `--nmax`; changing `nzeta` periodically resamples the
+same unchanged zeta coordinate. `--radial-order 2|4` controls only half-to-full
+radial interpolation. See [the format contract](docs/boozer-binary-v1.md) for
+exact array ordering and Fourier normalization.
 
 The magnetic axis is intentionally excluded because flux angles are
 degenerate there; the file records `first_surface=1` explicitly.

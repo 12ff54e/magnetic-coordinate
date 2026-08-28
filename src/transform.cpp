@@ -1,5 +1,6 @@
 #include "magnetic_coordinate/transform.hpp"
 
+#include "magnetic_coordinate/angular_resample.hpp"
 #include "magnetic_coordinate/boozer_fft.hpp"
 #include "magnetic_coordinate/pest.hpp"
 #include "magnetic_coordinate/spectral.hpp"
@@ -12,15 +13,19 @@ namespace magnetic_coordinate {
 
 BoozerResult transform_to_boozer(const CumesEquilibrium& equilibrium,
                                  const TransformSettings& settings) {
-    if (settings.output_ntheta < 0 || settings.mmax < -1 ||
+    if (settings.output_ntheta < 0 || settings.output_nzeta < 0 ||
+        settings.mmax < -1 ||
         settings.nmax < -1) {
         throw std::invalid_argument("invalid Boozer transform settings");
     }
     const int output_ntheta = settings.output_ntheta == 0
                                   ? equilibrium.ntheta
                                   : settings.output_ntheta;
+    const int output_nzeta = settings.output_nzeta == 0
+                                 ? equilibrium.nzeta
+                                 : settings.output_nzeta;
     const int available_m = (output_ntheta - 1) / 2;
-    const int available_n = (equilibrium.nzeta - 1) / 2;
+    const int available_n = (output_nzeta - 1) / 2;
     const int mmax = settings.mmax < 0
                          ? std::min(equilibrium.mpol - 1, available_m)
                          : settings.mmax;
@@ -28,17 +33,19 @@ BoozerResult transform_to_boozer(const CumesEquilibrium& equilibrium,
                          ? std::min(equilibrium.ntor, available_n)
                          : settings.nmax;
 
-    const auto integer_fields = prepare_integer_grid(
+    const auto source_integer_fields = prepare_integer_grid(
         equilibrium.native_field_view(), settings.radial_order);
     const auto normalization = reconstruct_flux_normalization(equilibrium);
-    const auto geometry =
+    const auto source_geometry =
         synthesize_native_geometry_gpu(equilibrium, normalization);
-    const auto pest = remap_to_pest(geometry, integer_fields);
+    const auto angular = resample_toroidal_grid(
+        source_geometry, source_integer_fields, output_nzeta);
+    const auto pest = remap_to_pest(angular.geometry, angular.fields);
     const auto shift = solve_boozer_shift_gpu(
-        pest, integer_fields.iota, equilibrium.nfp,
+        pest, angular.fields.iota, equilibrium.nfp,
         settings.resonance_tolerance);
     auto grid = remap_to_boozer_mixed_grid(
-        geometry, pest, shift, integer_fields.iota, output_ntheta);
+        angular.geometry, pest, shift, angular.fields.iota, output_ntheta);
     auto spectrum = analyze_mixed_grid_gpu(grid, mmax, nmax);
 
     BoozerResult result;
@@ -60,7 +67,7 @@ BoozerResult transform_to_boozer(const CumesEquilibrium& equilibrium,
             static_cast<double>(source_surface) /
             static_cast<double>(equilibrium.ns - 1);
         result.iota[static_cast<std::size_t>(surface)] =
-            integer_fields.iota[static_cast<std::size_t>(source_surface)];
+            angular.fields.iota[static_cast<std::size_t>(source_surface)];
     }
     result.grid = std::move(grid);
     result.spectrum = std::move(spectrum);
