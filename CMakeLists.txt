@@ -11,6 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(MAGNETIC_COORDINATE_BUILD_TESTING "Build magnetic-coordinate tests" ON)
 
 add_library(magnetic_coordinate STATIC
+  src/cumes_binary.cpp
   src/radial.cpp)
 add_library(magnetic-coordinate::magnetic-coordinate ALIAS magnetic_coordinate)
 
@@ -40,5 +41,18 @@ if(BUILD_TESTING AND MAGNETIC_COORDINATE_BUILD_TESTING)
   endif()
   add_test(NAME magnetic-coordinate.radial
            COMMAND magnetic_coordinate_radial_test)
-endif()
 
+  add_executable(magnetic_coordinate_cumes_binary_test
+    tests/cumes_binary_test.cpp)
+  target_link_libraries(magnetic_coordinate_cumes_binary_test
+    PRIVATE magnetic-coordinate::magnetic-coordinate)
+  if(MSVC)
+    target_compile_options(magnetic_coordinate_cumes_binary_test
+      PRIVATE /W4 /WX)
+  else()
+    target_compile_options(magnetic_coordinate_cumes_binary_test PRIVATE
+      -Wall -Wextra -Wpedantic -Wconversion -Werror)
+  endif()
+  add_test(NAME magnetic-coordinate.cumes-binary
+           COMMAND magnetic_coordinate_cumes_binary_test)
+endif()
