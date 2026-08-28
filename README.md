@@ -48,3 +48,24 @@ The install exports `magnetic-coordinate::magnetic_coordinate` and the
 `cumes-boozer` executable. A consuming CMake project can use
 `find_package(magnetic-coordinate CONFIG REQUIRED)` and link the exported
 target.
+
+The same transform is available without an intermediate file. Populate a
+non-owning `magnetic_coordinate::CumesEquilibriumView` with spans into a
+solver's converged arrays, then call:
+
+```cpp
+#include <magnetic_coordinate/boozer_binary.hpp>
+#include <magnetic_coordinate/transform.hpp>
+
+magnetic_coordinate::TransformSettings settings;
+auto result = magnetic_coordinate::transform_to_boozer(view, settings);
+
+// Optional: keep `result` in memory, or serialize it explicitly.
+magnetic_coordinate::write_boozer_binary("boozer-output.bin", result,
+                                         "in-memory equilibrium");
+```
+
+`CumesEquilibriumView` does not copy or own its arrays; they must remain valid
+until `transform_to_boozer` returns. `transform_cumes_file` and the standalone
+executable adapt file-backed storage to this same interface, so both paths run
+the identical implementation.

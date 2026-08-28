@@ -11,7 +11,7 @@
 
 namespace magnetic_coordinate {
 
-BoozerResult transform_to_boozer(const CumesEquilibrium& equilibrium,
+BoozerResult transform_to_boozer(const CumesEquilibriumView& equilibrium,
                                  const TransformSettings& settings) {
     if (settings.output_ntheta < 0 || settings.output_nzeta < 0 ||
         settings.mmax < -1 ||

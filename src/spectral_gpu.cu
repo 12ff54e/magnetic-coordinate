@@ -136,7 +136,7 @@ __global__ void assemble_geometry_spectra_kernel(
                 -static_cast<double>(signed_n * nfp) * lambda_imaginary, 0.0);
 }
 
-void validate_input(const CumesEquilibrium& equilibrium,
+void validate_input(const CumesEquilibriumView& equilibrium,
                     const FluxNormalization& normalization) {
     if (equilibrium.ns < 3 || equilibrium.mpol < 1 || equilibrium.ntor < 0 ||
         equilibrium.nfp < 1 || equilibrium.ntheta < 1 ||
@@ -172,7 +172,7 @@ void validate_input(const CumesEquilibrium& equilibrium,
 }  // namespace
 
 NativeAngularGeometry synthesize_native_geometry_gpu(
-    const CumesEquilibrium& equilibrium,
+    const CumesEquilibriumView& equilibrium,
     const FluxNormalization& normalization) {
     validate_input(equilibrium, normalization);
     const std::size_t family_size =

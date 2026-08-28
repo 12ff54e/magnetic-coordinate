@@ -79,6 +79,34 @@ void test_flux_normalization() {
                 1.0e-15, "lambda scale");
 }
 
+void test_non_owning_view() {
+    auto equilibrium = make_equilibrium();
+    equilibrium.format_version = 8;
+    equilibrium.ncurr = 1;
+    equilibrium.half_fields[magnetic_coordinate::CumesEquilibrium::SQRTG]
+        .assign(4, 3.0);
+
+    const auto view = equilibrium.view();
+    if (view.format_version != equilibrium.format_version ||
+        view.ns != equilibrium.ns || view.ncurr != equilibrium.ncurr) {
+        throw std::runtime_error("view metadata differs from owning input");
+    }
+    if (view.aphi.data() != equilibrium.aphi.data() ||
+        view.families[magnetic_coordinate::CumesEquilibrium::RMNCC].data() !=
+            equilibrium
+                .families[magnetic_coordinate::CumesEquilibrium::RMNCC]
+                .data() ||
+        view.half_fields[magnetic_coordinate::CumesEquilibrium::SQRTG].data() !=
+            equilibrium
+                .half_fields[magnetic_coordinate::CumesEquilibrium::SQRTG]
+                .data()) {
+        throw std::runtime_error("view copied an owning input array");
+    }
+
+    equilibrium.aphi[0] = 2.0;
+    expect_near(view.aphi[0], 2.0, 0.0, "view aliases owning storage");
+}
+
 void test_single_mode_synthesis() {
     auto equilibrium = make_equilibrium();
     constexpr int surface = 2;
@@ -141,6 +169,7 @@ void test_single_mode_synthesis() {
 int main() {
     try {
         test_flux_normalization();
+        test_non_owning_view();
         test_single_mode_synthesis();
     } catch (const std::exception& error) {
         std::cerr << "spectral_test: " << error.what() << '\n';

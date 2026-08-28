@@ -288,6 +288,43 @@ NativeFieldView CumesEquilibrium::native_field_view() const {
     };
 }
 
+CumesEquilibriumView CumesEquilibrium::view() const {
+    CumesEquilibriumView result;
+    result.format_version = format_version;
+    result.ns = ns;
+    result.mnmax = mnmax;
+    result.mpol = mpol;
+    result.ntor = ntor;
+    result.nfp = nfp;
+    result.ntheta = ntheta;
+    result.nzeta = nzeta;
+    result.ncurr = ncurr;
+    result.phiedge = phiedge;
+    result.aphi = aphi;
+    for (std::size_t family = 0; family < families.size(); ++family) {
+        result.families[family] = families[family];
+    }
+    for (std::size_t field = 0; field < half_fields.size(); ++field) {
+        result.half_fields[field] = half_fields[field];
+    }
+    return result;
+}
+
+NativeFieldView CumesEquilibriumView::native_field_view() const {
+    return NativeFieldView{
+        ns,
+        ntheta,
+        nzeta,
+        half_fields[CumesEquilibrium::SQRTG],
+        half_fields[CumesEquilibrium::BSUPS],
+        half_fields[CumesEquilibrium::BSUPU],
+        half_fields[CumesEquilibrium::BSUPV],
+        half_fields[CumesEquilibrium::BSUBS],
+        half_fields[CumesEquilibrium::BSUBU],
+        half_fields[CumesEquilibrium::BSUBV],
+    };
+}
+
 CumesEquilibrium read_cumes_binary(const std::filesystem::path& path) {
     BinaryReader reader(path);
     if (reader.read_magic() != MAGIC) {

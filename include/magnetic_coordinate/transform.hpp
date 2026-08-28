@@ -42,8 +42,14 @@ struct BoozerResult {
     MixedGridSpectrum spectrum;
 };
 
-BoozerResult transform_to_boozer(const CumesEquilibrium& equilibrium,
+BoozerResult transform_to_boozer(const CumesEquilibriumView& equilibrium,
                                  const TransformSettings& settings = {});
+
+inline BoozerResult transform_to_boozer(
+    const CumesEquilibrium& equilibrium,
+    const TransformSettings& settings = {}) {
+    return transform_to_boozer(equilibrium.view(), settings);
+}
 
 BoozerResult transform_cumes_file(
     const std::filesystem::path& input,

@@ -11,7 +11,7 @@
 namespace magnetic_coordinate {
 namespace {
 
-double toroidal_flux_derivative(const std::vector<double>& coefficients,
+double toroidal_flux_derivative(std::span<const double> coefficients,
                                 double s) {
     double derivative = 0.0;
     double power = 1.0;
@@ -23,13 +23,13 @@ double toroidal_flux_derivative(const std::vector<double>& coefficients,
     return derivative;
 }
 
-double toroidal_flux_at_one(const std::vector<double>& coefficients) {
+double toroidal_flux_at_one(std::span<const double> coefficients) {
     double value = 0.0;
     for (double coefficient : coefficients) value += coefficient;
     return value;
 }
 
-void validate_spectral_input(const CumesEquilibrium& equilibrium) {
+void validate_spectral_input(const CumesEquilibriumView& equilibrium) {
     if (equilibrium.ns < 3 || equilibrium.mpol < 1 || equilibrium.ntor < 0 ||
         equilibrium.nfp < 1 || equilibrium.ntheta < 1 ||
         equilibrium.nzeta < 1 || equilibrium.mnmax < 1) {
@@ -58,7 +58,7 @@ void validate_spectral_input(const CumesEquilibrium& equilibrium) {
 }  // namespace
 
 FluxNormalization reconstruct_flux_normalization(
-    const CumesEquilibrium& equilibrium) {
+    const CumesEquilibriumView& equilibrium) {
     if (equilibrium.ns < 3 || equilibrium.aphi.empty() ||
         !std::isfinite(equilibrium.phiedge)) {
         throw std::invalid_argument(
@@ -133,7 +133,7 @@ FluxNormalization reconstruct_flux_normalization(
 }
 
 NativeAngularGeometry synthesize_native_geometry(
-    const CumesEquilibrium& equilibrium,
+    const CumesEquilibriumView& equilibrium,
     const FluxNormalization& normalization) {
     validate_spectral_input(equilibrium);
     if (normalization.lambda_multiplier.size() !=

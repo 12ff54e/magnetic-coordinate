@@ -6,9 +6,12 @@
 #include <array>
 #include <cstdint>
 #include <filesystem>
+#include <span>
 #include <vector>
 
 namespace magnetic_coordinate {
+
+struct CumesEquilibriumView;
 
 struct CumesEquilibrium {
     static constexpr std::size_t SPECTRAL_FAMILY_COUNT = 6;
@@ -49,6 +52,31 @@ struct CumesEquilibrium {
     std::array<std::vector<double>, SPECTRAL_FAMILY_COUNT> families;
     std::array<std::vector<double>, HALF_FIELD_COUNT> half_fields;
     std::array<std::vector<double>, FULL_FIELD_COUNT> full_fields;
+
+    NativeFieldView native_field_view() const;
+    CumesEquilibriumView view() const;
+};
+
+// Non-owning scientific input accepted by the transform API. This is the
+// common boundary for file-backed conversion and direct invocation by an
+// equilibrium solver; callers retain ownership for the duration of the call.
+struct CumesEquilibriumView {
+    int format_version = 0;
+    int ns = 0;
+    int mnmax = 0;
+    int mpol = 0;
+    int ntor = 0;
+    int nfp = 0;
+    int ntheta = 0;
+    int nzeta = 0;
+    int ncurr = 0;
+    double phiedge = 0.0;
+    std::span<const double> aphi;
+
+    std::array<std::span<const double>, CumesEquilibrium::SPECTRAL_FAMILY_COUNT>
+        families;
+    std::array<std::span<const double>, CumesEquilibrium::HALF_FIELD_COUNT>
+        half_fields;
 
     NativeFieldView native_field_view() const;
 };
