@@ -26,14 +26,21 @@ cmake --build build -j
 ctest --test-dir build --output-on-failure
 
 ./build/cumes-boozer cumes-output.bin --output boozer-output.bin
+./build/cumes-boozer cumes-output.bin --output boozer-output.nc
+./build/cumes-boozer cumes-output.bin --output boozer-output.h5
 ```
 
 The default output poloidal resolution and spectral truncation follow the
 source equilibrium. They can be selected independently with `--ntheta`,
 `--nzeta`, `--mmax`, and `--nmax`; changing `nzeta` periodically resamples the
 same unchanged zeta coordinate. `--radial-order 2|4` controls only half-to-full
-radial interpolation. See [the format contract](docs/boozer-binary-v1.md) for
-exact array ordering and Fourier normalization.
+radial interpolation. The output suffix selects strict `.bin`, `.nc`, `.h5`,
+or `.hdf5` dispatch. NetCDF and HDF5 are detected at configure time and
+disabled gracefully when their libraries are absent; binary remains
+available. Every format stores the same six real parity families and never
+serializes complex numbers. See
+[the format contract](docs/boozer-output-v2.md) for exact array ordering and
+Fourier normalization.
 
 The magnetic axis is intentionally excluded because flux angles are
 degenerate there; the file records `first_surface=1` explicitly.
@@ -54,14 +61,14 @@ non-owning `magnetic_coordinate::CumesEquilibriumView` with spans into a
 solver's converged arrays, then call:
 
 ```cpp
-#include <magnetic_coordinate/boozer_binary.hpp>
+#include <magnetic_coordinate/boozer_output.hpp>
 #include <magnetic_coordinate/transform.hpp>
 
 magnetic_coordinate::TransformSettings settings;
 auto result = magnetic_coordinate::transform_to_boozer(view, settings);
 
 // Optional: keep `result` in memory, or serialize it explicitly.
-magnetic_coordinate::write_boozer_binary("boozer-output.bin", result,
+magnetic_coordinate::write_boozer_output("boozer-output.h5", result,
                                          "in-memory equilibrium");
 ```
 

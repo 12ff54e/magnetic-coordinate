@@ -13,9 +13,9 @@ struct BoozerFile {
     BoozerResult result;
 };
 
-// Version 1 is little-endian and stores continuous-integral complex spectra.
-// Its coordinate metadata states that zeta is the unchanged source angle and
-// that zeta_b = zeta + nu.
+// Version 2 is little-endian and stores only real parity-family coefficients,
+// matching cuMES's real spectral output style. Its coordinate metadata states
+// that zeta is the unchanged source angle and that zeta_b = zeta + nu.
 void write_boozer_binary(const std::filesystem::path& path,
                          const BoozerResult& result,
                          const std::filesystem::path& source_path);

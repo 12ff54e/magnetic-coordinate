@@ -1,4 +1,4 @@
-#include "magnetic_coordinate/boozer_binary.hpp"
+#include "magnetic_coordinate/boozer_output.hpp"
 #include "magnetic_coordinate/transform.hpp"
 
 #include <charconv>
@@ -33,8 +33,7 @@ double parse_double(std::string_view text, const char* option) {
     const auto [end, error] =
         std::from_chars(text.data(), text.data() + text.size(), value);
     if (error != std::errc{} || end != text.data() + text.size()) {
-        throw std::invalid_argument(std::string(option) +
-                                    " requires a number");
+        throw std::invalid_argument(std::string(option) + " requires a number");
     }
     return value;
 }
@@ -65,8 +64,8 @@ CommandLine parse_command_line(int argc, char** argv) {
             command.settings.nmax =
                 parse_integer(value_after("--nmax"), "--nmax");
         } else if (token == "--radial-order") {
-            const int order = parse_integer(value_after("--radial-order"),
-                                            "--radial-order");
+            const int order =
+                parse_integer(value_after("--radial-order"), "--radial-order");
             if (order == 2) {
                 command.settings.radial_order =
                     magnetic_coordinate::RadialInterpolationOrder::TWO_POINT;
@@ -78,8 +77,7 @@ CommandLine parse_command_line(int argc, char** argv) {
             }
         } else if (token == "--resonance-tolerance") {
             command.settings.resonance_tolerance = parse_double(
-                value_after("--resonance-tolerance"),
-                "--resonance-tolerance");
+                value_after("--resonance-tolerance"), "--resonance-tolerance");
         } else if (token == "-h" || token == "--help") {
             std::cout
                 << "usage: cumes-boozer INPUT [--output FILE] [--ntheta N] "
@@ -107,15 +105,27 @@ CommandLine parse_command_line(int argc, char** argv) {
 int main(int argc, char** argv) {
     try {
         const auto command = parse_command_line(argc, argv);
+        const auto output_spec =
+            magnetic_coordinate::resolve_boozer_output_spec(command.output);
+        if (!magnetic_coordinate::boozer_output_format_available(
+                output_spec.format)) {
+            throw std::runtime_error(
+                "output format '" +
+                std::string(magnetic_coordinate::boozer_output_suffix(
+                    output_spec.format)) +
+                "' is not available in this build");
+        }
         const auto result = magnetic_coordinate::transform_cumes_file(
             command.input, command.settings);
-        magnetic_coordinate::write_boozer_binary(
-            command.output, result, command.input);
-        std::cout << "wrote " << command.output << " with "
-                  << result.s.size() << " non-axis surfaces, "
-                  << result.grid.ntheta << "x" << result.grid.nzeta
-                  << " mixed-grid points per surface, and "
-                  << result.spectrum.m.size() << " modes per surface\n";
+        magnetic_coordinate::write_boozer_output(output_spec, result,
+                                                 command.input);
+        const auto real_modes =
+            static_cast<std::size_t>(result.spectrum.mmax + 1) *
+            static_cast<std::size_t>(result.spectrum.nmax + 1);
+        std::cout << "wrote " << command.output << " with " << result.s.size()
+                  << " non-axis surfaces, " << result.grid.ntheta << "x"
+                  << result.grid.nzeta << " mixed-grid points per surface, and "
+                  << real_modes << " real modes per surface\n";
     } catch (const std::exception& error) {
         std::cerr << "cumes-boozer: " << error.what() << '\n';
         return 1;
