@@ -71,6 +71,21 @@ void test_manufactured_shift() {
                 toroidal_amplitude / static_cast<double>(nfp) * std::sin(zeta);
             expect_near(shift.nu[point], expected, 2.0e-13,
                         "manufactured Boozer shift");
+            if (theta_index == 0) {
+                // zeta is the stored field-period angle alpha. The solver's
+                // nu is in physical toroidal radians, so the corresponding
+                // field-period displacement is nfp*nu.
+                const double alpha_b = zeta + nfp * shift.nu[point];
+                expect_near(alpha_b - zeta,
+                            toroidal_amplitude * std::sin(zeta), 2.0e-13,
+                            "manufactured field-period Boozer map");
+                const double dalpha_b_dalpha =
+                    1.0 + toroidal_amplitude * std::cos(zeta);
+                if (!(dalpha_b_dalpha > 0.0)) {
+                    throw std::runtime_error(
+                        "manufactured field-period map is not monotone");
+                }
+            }
         }
     }
 }

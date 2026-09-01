@@ -27,7 +27,7 @@ BoozerOutputSpec resolve_boozer_output_spec(const std::filesystem::path& path);
 bool boozer_output_format_available(BoozerOutputFormat format);
 std::string_view boozer_output_suffix(BoozerOutputFormat format);
 
-// Write the selected v2 container. The result remains format-neutral and can
+// Write the selected v3 container. The result remains format-neutral and can
 // instead be retained in memory by a future solver-library caller.
 void write_boozer_output(const BoozerOutputSpec& spec,
                          const BoozerResult& result,

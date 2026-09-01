@@ -10,7 +10,7 @@ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
       "CUDA architectures for magnetic-coordinate")
 endif()
 
-project(magnetic-coordinate VERSION 0.1.0 LANGUAGES CXX CUDA)
+project(magnetic-coordinate VERSION 0.2.0 LANGUAGES CXX CUDA)
 
 include(CTest)
 include(CMakePackageConfigHelpers)

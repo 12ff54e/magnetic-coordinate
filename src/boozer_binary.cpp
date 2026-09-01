@@ -17,8 +17,8 @@
 namespace magnetic_coordinate {
 namespace {
 
-constexpr std::array<char, 8> MAGIC{'M', 'C', 'B', 'O', 'O', 'Z', '0', '2'};
-constexpr std::int32_t VERSION = 2;
+constexpr std::array<char, 8> MAGIC{'M', 'C', 'B', 'O', 'O', 'Z', '0', '3'};
+constexpr std::int32_t VERSION = 3;
 
 std::size_t checked_product(std::size_t left, std::size_t right) {
     if (left != 0 && right > std::numeric_limits<std::size_t>::max() / left) {

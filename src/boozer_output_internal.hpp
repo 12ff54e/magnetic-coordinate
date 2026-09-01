@@ -10,16 +10,17 @@
 namespace magnetic_coordinate::detail {
 
 inline constexpr std::string_view BOOZER_SCHEMA =
-    "magnetic-coordinate-boozer-v2";
+    "magnetic-coordinate-boozer-v3";
 inline constexpr std::string_view COORDINATE_CONVENTION =
-    "mixed-grid-v1: theta_b uniform; zeta is the unchanged source toroidal "
-    "angle; zeta_b=zeta+nu";
+    "mixed-grid-v2: theta_b uniform; alpha=nfp*zeta is the unchanged source "
+    "field-period angle; alpha_b=alpha+nfp*nu; nu is in physical toroidal "
+    "radians";
 inline constexpr std::string_view FOURIER_CONVENTION =
-    "real-parity-v2: f=sum[cc*cos(m*theta_b)*cos(n*zeta) + "
-    "ss*sin(m*theta_b)*sin(n*zeta)] for even fields and "
-    "f=sum[sc*sin(m*theta_b)*cos(n*zeta) + "
-    "cs*cos(m*theta_b)*sin(n*zeta)] for odd fields; m,n are nonnegative "
-    "and n is a field-period mode";
+    "real-parity-v3: f=sum[cc*cos(m*theta_b)*cos(n*alpha) + "
+    "ss*sin(m*theta_b)*sin(n*alpha)] for even fields and "
+    "f=sum[sc*sin(m*theta_b)*cos(n*alpha) + "
+    "cs*cos(m*theta_b)*sin(n*alpha)] for odd fields; m,n are nonnegative "
+    "and alpha is a field-period angle";
 
 struct RealBoozerSpectrum {
     int mmax = 0;

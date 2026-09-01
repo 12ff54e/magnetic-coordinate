@@ -1,7 +1,7 @@
 # magnetic-coordinate contributor instructions
 
 - Use strict C++20 and CUDA C++20 without GNU extensions.
-- Treat the formulas and normalization in `docs/boozer-output-v2.md` as
+- Treat the formulas and normalization in `docs/boozer-output-v3.md` as
   contracts; keep every public container real-valued and change the schema
   only with a format-version bump and tests.
 - Keep the magnetic axis out of angular root solves.

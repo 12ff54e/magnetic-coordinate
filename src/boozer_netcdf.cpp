@@ -50,7 +50,7 @@ void write_boozer_netcdf(const std::filesystem::path& path,
 
         int surface_dim = -1;
         int theta_dim = -1;
-        int zeta_dim = -1;
+        int alpha_dim = -1;
         int mode_dim = -1;
         check_netcdf(
             nc_def_dim(file, "surface", static_cast<std::size_t>(surfaces),
@@ -61,24 +61,24 @@ void write_boozer_netcdf(const std::filesystem::path& path,
                                 &theta_dim),
                      "define theta_b dimension");
         check_netcdf(
-            nc_def_dim(file, "zeta",
-                       static_cast<std::size_t>(result.grid.nzeta), &zeta_dim),
-            "define zeta dimension");
+            nc_def_dim(file, "alpha",
+                       static_cast<std::size_t>(result.grid.nzeta), &alpha_dim),
+            "define alpha dimension");
         check_netcdf(nc_def_dim(file, "mode", static_cast<std::size_t>(modes),
                                 &mode_dim),
                      "define mode dimension");
 
         const int surface_dims[1] = {surface_dim};
         const int theta_dims[1] = {theta_dim};
-        const int zeta_dims[1] = {zeta_dim};
+        const int alpha_dims[1] = {alpha_dim};
         const int mode_dims[1] = {mode_dim};
         const int spectrum_dims[2] = {surface_dim, mode_dim};
-        const int grid_dims[3] = {surface_dim, zeta_dim, theta_dim};
+        const int grid_dims[3] = {surface_dim, alpha_dim, theta_dim};
         int s_var = -1;
         int iota_var = -1;
         int b2j00_var = -1;
         int theta_var = -1;
-        int zeta_var = -1;
+        int alpha_var = -1;
         int m_var = -1;
         int n_var = -1;
         int rmncc_var = -1;
@@ -101,8 +101,8 @@ void write_boozer_netcdf(const std::filesystem::path& path,
             nc_def_var(file, "theta_b", NC_DOUBLE, 1, theta_dims, &theta_var),
             "define theta_b");
         check_netcdf(
-            nc_def_var(file, "zeta", NC_DOUBLE, 1, zeta_dims, &zeta_var),
-            "define zeta");
+            nc_def_var(file, "alpha", NC_DOUBLE, 1, alpha_dims, &alpha_var),
+            "define alpha");
         check_netcdf(nc_def_var(file, "mode_m", NC_INT, 1, mode_dims, &m_var),
                      "define mode_m");
         check_netcdf(nc_def_var(file, "mode_n", NC_INT, 1, mode_dims, &n_var),
@@ -167,7 +167,7 @@ void write_boozer_netcdf(const std::filesystem::path& path,
 
         check_netcdf(nc_enddef(file), "end definitions");
         const auto theta_b = periodic_angles(result.grid.ntheta);
-        const auto zeta = periodic_angles(result.grid.nzeta);
+        const auto alpha = periodic_angles(result.grid.nzeta);
         check_netcdf(nc_put_var_double(file, s_var, result.s.data()),
                      "write s");
         check_netcdf(nc_put_var_double(file, iota_var, result.iota.data()),
@@ -177,8 +177,8 @@ void write_boozer_netcdf(const std::filesystem::path& path,
             "write b2j00");
         check_netcdf(nc_put_var_double(file, theta_var, theta_b.data()),
                      "write theta_b");
-        check_netcdf(nc_put_var_double(file, zeta_var, zeta.data()),
-                     "write zeta");
+        check_netcdf(nc_put_var_double(file, alpha_var, alpha.data()),
+                     "write alpha");
         check_netcdf(nc_put_var_int(file, m_var, spectrum.m.data()),
                      "write mode_m");
         check_netcdf(nc_put_var_int(file, n_var, spectrum.n.data()),

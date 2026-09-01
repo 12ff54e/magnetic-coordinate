@@ -151,7 +151,7 @@ void write_boozer_hdf5(const std::filesystem::path& path,
         const hsize_t surface_dims[1] = {static_cast<hsize_t>(result.s.size())};
         const hsize_t theta_dims[1] = {
             static_cast<hsize_t>(result.grid.ntheta)};
-        const hsize_t zeta_dims[1] = {static_cast<hsize_t>(result.grid.nzeta)};
+        const hsize_t alpha_dims[1] = {static_cast<hsize_t>(result.grid.nzeta)};
         const hsize_t mode_dims[1] = {static_cast<hsize_t>(spectrum.m.size())};
         const hsize_t spectrum_dims[2] = {
             static_cast<hsize_t>(result.s.size()),
@@ -160,7 +160,7 @@ void write_boozer_hdf5(const std::filesystem::path& path,
                                       static_cast<hsize_t>(result.grid.nzeta),
                                       static_cast<hsize_t>(result.grid.ntheta)};
         const auto theta_b = periodic_angles(result.grid.ntheta);
-        const auto zeta = periodic_angles(result.grid.nzeta);
+        const auto alpha = periodic_angles(result.grid.nzeta);
         write_dataset(file, "s", H5T_NATIVE_DOUBLE, surface_dims,
                       result.s.data());
         write_dataset(file, "iota", H5T_NATIVE_DOUBLE, surface_dims,
@@ -169,7 +169,8 @@ void write_boozer_hdf5(const std::filesystem::path& path,
                       result.grid.b2j00.data());
         write_dataset(file, "theta_b", H5T_NATIVE_DOUBLE, theta_dims,
                       theta_b.data());
-        write_dataset(file, "zeta", H5T_NATIVE_DOUBLE, zeta_dims, zeta.data());
+        write_dataset(file, "alpha", H5T_NATIVE_DOUBLE, alpha_dims,
+                      alpha.data());
         write_dataset(file, "mode_m", H5T_NATIVE_INT, mode_dims,
                       spectrum.m.data());
         write_dataset(file, "mode_n", H5T_NATIVE_INT, mode_dims,

@@ -191,6 +191,12 @@ void test_netcdf_output() {
            "NetCDF rmncc is a real rank-2 array");
     expect(nc_inq_varid(file, "R_spectrum", &variable) == NC_ENOTVAR,
            "NetCDF has no complex spectrum variable");
+    int alpha_dimension = -1;
+    expect(nc_inq_dimid(file, "alpha", &alpha_dimension) == NC_NOERR,
+           "NetCDF has field-period alpha dimension");
+    int obsolete_zeta_dimension = -1;
+    expect(nc_inq_dimid(file, "zeta", &obsolete_zeta_dimension) == NC_EBADDIM,
+           "NetCDF has no ambiguous zeta dimension");
     int complex_dimension = -1;
     expect(nc_inq_dimid(file, "complex_component", &complex_dimension) ==
                NC_EBADDIM,
@@ -227,6 +233,10 @@ void test_hdf5_output() {
            "HDF5 rmncc is real-valued");
     expect(H5Lexists(file, "R_spectrum", H5P_DEFAULT) == 0,
            "HDF5 has no complex spectrum dataset");
+    expect(H5Lexists(file, "alpha", H5P_DEFAULT) > 0,
+           "HDF5 has field-period alpha dataset");
+    expect(H5Lexists(file, "zeta", H5P_DEFAULT) == 0,
+           "HDF5 has no ambiguous zeta dataset");
     double rmncc[2] = {};
     expect(H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                    rmncc) >= 0,

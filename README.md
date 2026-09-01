@@ -2,15 +2,18 @@
 
 `magnetic-coordinate` converts a converged cuMES schema-v8 equilibrium into a
 Boozer representation. It exports geometry on a grid uniform in Boozer
-poloidal angle while deliberately retaining the source toroidal angle:
+poloidal angle while deliberately retaining the source field-period angle:
 
 ```text
-(s, theta_b, zeta),       zeta_b = zeta + nu(theta_b, zeta)
+(s, theta_b, alpha),      alpha = nfp*zeta
+                          alpha_b = alpha + nfp*nu(theta_b, alpha)
 ```
 
-This is a mixed grid, not a grid uniform in both Boozer angles. Spectral `nu`
-is included so consumers can construct whatever uniform `zeta_b` grid they
-need.
+Here `zeta` and `zeta_b` are physical toroidal angles, while `alpha` and
+`alpha_b` cover one field period from zero to `2*pi`. `nu` is stored in
+physical toroidal radians. This is a mixed grid, not a grid uniform in both
+Boozer angles. Spectral `nu` is included so consumers can construct whatever
+uniform `alpha_b` grid they need.
 
 The transform validates cuMES scientific fields, computes invariant `B`,
 unstaggers radial fields, recovers converged iota, reconstructs physical PEST
@@ -33,13 +36,13 @@ ctest --test-dir build --output-on-failure
 The default output poloidal resolution and spectral truncation follow the
 source equilibrium. They can be selected independently with `--ntheta`,
 `--nzeta`, `--mmax`, and `--nmax`; changing `nzeta` periodically resamples the
-same unchanged zeta coordinate. `--radial-order 2|4` controls only half-to-full
+same unchanged `alpha` coordinate. `--radial-order 2|4` controls only half-to-full
 radial interpolation. The output suffix selects strict `.bin`, `.nc`, `.h5`,
 or `.hdf5` dispatch. NetCDF and HDF5 are detected at configure time and
 disabled gracefully when their libraries are absent; binary remains
 available. Every format stores the same six real parity families and never
 serializes complex numbers. See
-[the format contract](docs/boozer-output-v2.md) for exact array ordering and
+[the format contract](docs/boozer-output-v3.md) for exact array ordering and
 Fourier normalization.
 
 The magnetic axis is intentionally excluded because flux angles are

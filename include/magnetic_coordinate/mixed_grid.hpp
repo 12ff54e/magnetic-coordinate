@@ -9,9 +9,10 @@
 
 namespace magnetic_coordinate {
 
-// Fields on a grid uniform in Boozer poloidal angle while retaining the
-// source toroidal angle. Surface zero corresponds to first_surface in the
-// source equilibrium; theta is contiguous in every array.
+// Fields on a grid uniform in Boozer poloidal angle while retaining the source
+// field-period angle alpha=nfp*zeta. The stored nu remains a physical
+// toroidal-angle shift, so alpha_b=alpha+nfp*nu. Surface zero corresponds to
+// first_surface in the source equilibrium; theta is contiguous in every array.
 struct BoozerMixedGrid {
     int source_ns = 0;
     int first_surface = 1;
@@ -29,7 +30,7 @@ struct BoozerMixedGrid {
 };
 
 // The poloidal resolution is independent of the source grid. The toroidal
-// coordinate deliberately remains the unchanged source zeta grid.
+// coordinate deliberately remains the unchanged source alpha grid.
 BoozerMixedGrid remap_to_boozer_mixed_grid(
     const NativeAngularGeometry& geometry,
     const PestGrid& pest,
